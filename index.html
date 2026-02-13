@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Love</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* --- Global Variables & Reset --- */
+        :root {
+            --bg-color: #FFF0F3;
+            --card-bg: #FFFFFF;
+            --primary-pink: #FFB7C5;
+            --accent-gold: #E6C2BF;
+            --text-dark: #594A4E;
+            --text-light: #8C7B80;
+            --shadow: 0 10px 30px rgba(255, 182, 193, 0.2);
+            --transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: radial-gradient(circle at 50% 50%, #fff 0%, #FFF0F3 100%);
+        }
+
+        h1, h2, h3, .poetic {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+        }
+
+        /* --- Layout --- */
+        #app {
+            width: 100%;
+            max-width: 500px;
+            min-height: 90vh;
+            position: relative;
+            padding: 20px;
+        }
+
+        /* --- Page Transitions --- */
+        .page {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; text-align: center;
+            z-index: 1;
+        }
+
+        .page.active { opacity: 1; visibility: visible; z-index: 10; }
+
+        /* --- Components --- */
+        .card {
+            background: var(--card-bg);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #FFD1DC 0%, #FFB7C5 100%);
+            border: none;
+            padding: 12px 40px;
+            border-radius: 50px;
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 183, 197, 0.4);
+            transition: all 0.5s ease;
+            margin-top: 20px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Hidden Button Style */
+        .btn.hidden-btn {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 183, 197, 0.6);
+        }
+
+        .btn-secondary {
+            background: white; color: var(--text-light); border: 1px solid var(--primary-pink);
+            padding: 10px 20px; font-size: 0.9rem;
+        }
+
+        /* --- Specific Elements --- */
+        .hero-title { font-size: 3rem; color: var(--text-dark); margin-bottom: 10px; }
+        
+        .letter-content {
+            max-height: 50vh; overflow-y: auto;
+            font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; line-height: 1.8;
+            text-align: left; padding-right: 10px;
+        }
+
+        .compliment-card { height: 200px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .comp-text { font-size: 1.5rem; color: var(--text-dark); margin-top: 10px; opacity: 1; transition: opacity 0.3s; }
+
+        /* Games */
+        .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; width: 100%; }
+        .memory-card { aspect-ratio: 1; background: #FFD1DC; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; transition: transform 0.3s; }
+        .memory-card.flipped { background: white; color: var(--text-dark); border: 2px solid #FFD1DC; }
+
+        .wheel-container { position: relative; width: 220px; height: 220px; margin: 0 auto; }
+        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 8px solid white; background: conic-gradient(#FFD1DC 0% 25%, #E6C2BF 25% 50%, #FFB7C5 50% 75%, #FFF0F3 75% 100%); transition: transform 4s cubic-bezier(0.1, 0.9, 0.2, 1); box-shadow: var(--shadow); }
+        .stopper { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 20px solid var(--text-dark); z-index: 2; }
+
+        .breathe-circle {
+            width: 150px; height: 150px; background: #FFD1DC; border-radius: 50%; margin: 0 auto;
+            animation: breathe 4s ease-in-out infinite;
+            display: flex; align-items: center; justify-content: center; color: white;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 0.4; }
+        }
+
+        /* Floating Animation */
+        .floating-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .float-heart { position: absolute; color: rgba(255, 183, 197, 0.4); animation: floatUp 15s linear infinite; }
+        @keyframes floatUp { 0% { transform: translateY(100vh) rotate(0deg); opacity: 0; } 100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; } }
+
+    </style>
+</head>
+<body>
+
+<div class="floating-container" id="floater"></div>
+
+<div id="app">
+    
+    <section class="page active" id="p1">
+        <h1 class="hero-title">For You</h1>
+        <p class="poetic" style="font-size: 1.2rem; font-style: italic;">A quiet digital garden,<br>grown just for us.</p>
+        <div style="margin-top: 50px; font-size: 3rem;">🌸</div>
+        <button class="btn" onclick="nextPage()">Enter Softly</button>
+    </section>
+
+    <section class="page" id="p2">
+        <h2>A Letter...</h2>
+        <div class="card">
+            <div class="letter-content">
+                <p>My Dearest,</p><br>
+                <p>I didn't want to make something loud. I wanted to make something that feels like holding hands.</p><br>
+                <p>Every page here is a piece of my heart. Every button is a wish for your happiness. In this busy world, I hope this little site feels like a soft place to land.</p><br>
+                <p>Take your time. There is no rush here.</p><br>
+                <p class="poetic" style="text-align: right;">- Yours</p>
+            </div>
+        </div>
+        <button class="btn" onclick="nextPage()">I've Read It ❤️</button>
+    </section>
+
+    <section class="page" id="p3">
+        <h2>Things I Adore</h2>
+        <p style="margin-bottom:15px; color:var(--text-light)">Tap the card...</p>
+        <div class="card compliment-card" onclick="cycleCompliment()">
+            <div style="text-align: center;">
+                <div style="font-size: 3rem;">💕</div>
+                <div class="comp-text" id="comp-text">Tap me gently</div>
+            </div>
+        </div>
+        <button class="btn hidden-btn" id="btn-3" onclick="nextPage()">Continue</button>
+    </section>
+
+    <section class="page" id="p4">
+        <h2>Tiny Notes</h2>
+        <div class="card" style="min-height: 180px; display:flex; align-items:center; justify-content:center;">
+            <p id="daily-note" class="poetic" style="font-size: 1.4rem;">...</p>
+        </div>
+        <button class="btn btn-secondary" onclick="newNote()">Open a Note 💌</button>
+        <br>
+        <button class="btn hidden-btn" id="btn-4" onclick="nextPage()">Continue</button>
+    </section>
+
+    <section class="page" id="p5">
+        <h3>1. Match the Love</h3>
+        <p style="font-size: 0.9rem;">Find all pairs to proceed</p>
+        <div class="memory-grid" id="memory-board"></div>
+        <p id="memory-msg" style="height: 20px; color: var(--primary-pink); font-weight: bold;"></p>
+        <button class="btn hidden-btn" id="btn-5" onclick="nextPage()">Next Game</button>
+    </section>
+
+    <section class="page" id="p6">
+        <h3>2. Spin for a Kiss</h3>
+        <div class="wheel-container">
+            <div class="stopper"></div>
+            <div class="wheel" id="spinner"></div>
+        </div>
+        <button class="btn" style="margin-top: 30px;" id="spin-btn" onclick="spinWheel()">Spin</button>
+        <p id="spin-result" style="margin-top: 15px; font-weight: bold; min-height: 25px;"></p>
+        <button class="btn hidden-btn" id="btn-6" onclick="nextPage()">Next Game</button>
+    </section>
+
+    <section class="page" id="p7">
+        <h3>3. This or That?</h3>
+        <div class="card">
+            <div style="display: flex; justify-content: space-around; align-items: center; padding: 20px 0;">
+                <div onclick="pickChoice(this)" style="cursor: pointer; padding: 10px; border-radius: 10px;">☕<br>Coffee</div>
+                <div style="color: var(--primary-pink);">or</div>
+                <div onclick="pickChoice(this)" style="cursor: pointer; padding: 10px; border-radius: 10px;">🍵<br>Tea</div>
+            </div>
+            <p id="choice-feedback" style="font-size: 0.9rem; color: var(--text-light); min-height: 20px;">Tap your choice!</p>
+        </div>
+        <button class="btn hidden-btn" id="btn-7" onclick="nextPage()">Next Game</button>
+    </section>
+
+    <section class="page" id="p8">
+        <h3>4. Shy & Playful</h3>
+        <div class="card">
+            <p id="dare-text" style="font-size: 1.3rem; margin-bottom: 20px;">Are you brave enough?</p>
+            <button class="btn btn-secondary" onclick="rollDare()">Gimme a Task</button>
+        </div>
+        <button class="btn hidden-btn" id="btn-8" onclick="nextPage()">I did it 😳</button>
+    </section>
+
+    <section class="page" id="p9">
+        <h2>Love Generator</h2>
+        <div class="card" style="background: linear-gradient(135deg, #FFF0F3, #FFF);">
+            <h1 style="font-size: 4rem; cursor: pointer;" onclick="generateLove()">💌</h1>
+            <p>Tap the envelope</p>
+        </div>
+        <p id="gen-msg" class="poetic" style="font-size: 1.2rem; min-height: 40px; margin-top:10px;"></p>
+        <button class="btn hidden-btn" id="btn-9" onclick="nextPage()">Continue</button>
+    </section>
+
+    <section class="page" id="p10">
+        <h2>Quiet Poetry</h2>
+        <div class="card" style="padding: 40px 20px;">
+            <p class="poetic" style="font-size: 1.4rem; line-height: 1.6;">
+                "I carry your heart with me<br>
+                (I carry it in my heart)<br>
+                I am never without it..."
+            </p>
+            <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-light);">- e.e. cummings</p>
+        </div>
+        <button class="btn" onclick="nextPage()">Beautiful...</button>
+    </section>
+
+    <section class="page" id="p11">
+        <h2>5. Catch the Heart</h2>
+        <div style="height: 250px; width: 100%; position: relative; border: 2px dashed #FFD1DC; border-radius: 20px; overflow: hidden;" id="tap-area">
+            <div id="tap-target" style="position: absolute; font-size: 2rem; cursor: pointer; transition: top 0.5s, left 0.5s;" onclick="catchHeart()">💖</div>
+        </div>
+        <p style="margin-top:10px;">Score: <span id="score">0</span></p>
+        <button class="btn hidden-btn" id="btn-11" onclick="nextPage()">Good Catch!</button>
+    </section>
+
+    <section class="page" id="p12">
+        <h2>Just Breathe</h2>
+        <p style="margin-bottom: 30px;">Inhale... Exhale...</p>
+        <div class="breathe-circle">Love</div>
+        <p style="margin-top:20px; font-size:0.8rem; color:var(--text-light);">Wait for it...</p>
+        <button class="btn hidden-btn" id="btn-12" onclick="nextPage()">I feel calm</button>
+    </section>
+
+    <section class="page" id="p13">
+        <h2>Safe Space</h2>
+        <div class="card" style="background: #FDFBF7;">
+            <p class="poetic" style="font-size: 1.5rem; color: #594A4E;">
+                "Your feelings matter.<br>Your joy matters.<br>You are safe here."
+            </p>
+        </div>
+        <button class="btn" onclick="nextPage()">Next</button>
+    </section>
+
+    <section class="page" id="p14">
+        <h2>Just Between Us</h2>
+        <div class="card">
+            <p id="shy-msg">If I could kiss you right now...</p>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="shyReact('blush')">I'd blush</button>
+                <button class="btn btn-secondary" onclick="shyReact('smile')">I'd smile</button>
+            </div>
+            <p id="shy-reaction" style="margin-top: 20px; height: 20px; color: var(--primary-pink);"></p>
+        </div>
+        <button class="btn hidden-btn" id="btn-14" onclick="nextPage()">Final Stop</button>
+    </section>
+
+    <section class="page" id="p15">
+        <h1 class="poetic">Always.</h1>
+        <p style="margin: 20px 0; font-size: 1.2rem;">Love doesn't rush.<br>It stays quietly.</p>
+        <div style="font-size: 3rem; animation: pulse 2s infinite;">❤️</div>
+        <p style="margin-top: 50px; font-size: 0.8rem; color: var(--text-light);">Made with love.</p>
+        <button class="btn btn-secondary" style="margin-top: 30px;" onclick="location.reload()">Replay the Love</button>
+    </section>
+
+</div>
+
+<script>
+    /* --- State & Navigation --- */
+    let currentPage = 1;
+    const totalPages = 15;
+
+    function goToPage(pageNum) {
+        document.querySelector('.page.active').classList.remove('active');
+        document.getElementById(`p${pageNum}`).classList.add('active');
+        currentPage = pageNum;
+
+        // Specific Logic for Breathe Page (Page 12)
+        if(pageNum === 12) {
+            setTimeout(() => {
+                unlockNext(12);
+            }, 5000); // 5 seconds delay
+        }
+    }
+
+    function nextPage() {
+        if(currentPage < totalPages) goToPage(currentPage + 1);
+    }
+    
+    // Helper to reveal the next button
+    function unlockNext(id) {
+        const btn = document.getElementById(`btn-${id}`);
+        if(btn) btn.classList.remove('hidden-btn');
+    }
+
+    /* --- Content Logic --- */
+
+    // Page 3: Compliments
+    const compliments = [
+        "Your kindness makes the world softer.",
+        "I love the way your eyes crinkle when you smile.",
+        "You give the best hugs in history.",
+        "Your voice is my favorite sound.",
+        "You are smarter than you know."
+    ];
+    function cycleCompliment() {
+        const el = document.getElementById('comp-text');
+        el.style.opacity = 0;
+        setTimeout(() => {
+            el.innerText = compliments[Math.floor(Math.random() * compliments.length)];
+            el.style.opacity = 1;
+            unlockNext(3); // Reveal button
+        }, 300);
+    }
+
+    // Page 4: Notes
+    const notes = ["I'm so proud of you.", "Remember to drink water.", "You looked cute today.", "Sending a mental forehead kiss."];
+    function newNote() {
+        document.getElementById('daily-note').innerText = notes[Math.floor(Math.random() * notes.length)];
+        unlockNext(4); // Reveal button
+    }
+
+    // Page 5: Memory Game
+    const icons = ['🌸', '💖', '💌', '🐰', '🌸', '💖', '💌', '🐰'];
+    let flippedCards = [];
+    let matchedPairs = 0;
+    
+    function initMemory() {
+        const board = document.getElementById('memory-board');
+        board.innerHTML = '';
+        const shuffled = icons.sort(() => 0.5 - Math.random());
+        shuffled.forEach(icon => {
+            const card = document.createElement('div');
+            card.className = 'memory-card';
+            card.dataset.icon = icon;
+            card.onclick = () => flipCard(card);
+            board.appendChild(card);
+        });
+    }
+    
+    function flipCard(card) {
+        if (flippedCards.length < 2 && !card.classList.contains('flipped')) {
+            card.innerText = card.dataset.icon;
+            card.classList.add('flipped');
+            flippedCards.push(card);
+            if (flippedCards.length === 2) setTimeout(checkMatch, 800);
+        }
+    }
+    
+    function checkMatch() {
+        const [c1, c2] = flippedCards;
+        if (c1.dataset.icon === c2.dataset.icon) {
+            matchedPairs++;
+            if (matchedPairs === 4) {
+                document.getElementById('memory-msg').innerText = "You found them all! 💕";
+                unlockNext(5); // Unlock Next
+            }
+        } else {
+            c1.innerText = ''; c2.innerText = '';
+            c1.classList.remove('flipped'); c2.classList.remove('flipped');
+        }
+        flippedCards = [];
+    }
+    initMemory();
+
+    // Page 6: Spinner
+    function spinWheel() {
+        const wheel = document.getElementById('spinner');
+        const btn = document.getElementById('spin-btn');
+        btn.disabled = true; // Prevent double spin
+        const rot = Math.floor(Math.random() * 360) + 1440;
+        wheel.style.transform = `rotate(${rot}deg)`;
+        
+        setTimeout(() => {
+            const results = ["A Hug", "A Kiss", "A Cuddle", "A Date"];
+            document.getElementById('spin-result').innerText = "Result: " + results[Math.floor(Math.random() * results.length)];
+            unlockNext(6); // Unlock Next
+        }, 4000);
+    }
+
+    // Page 7: This or That
+    function pickChoice(el) {
+        el.style.background = "#FFD1DC";
+        document.getElementById('choice-feedback').innerText = "Good choice! I love that too.";
+        unlockNext(7); // Unlock Next
+    }
+
+    // Page 8: Dares
+    const dares = ["Send a selfie.", "Name your fav memory of us.", "Blow a kiss.", "Whisper 'I love you'."];
+    function rollDare() {
+        document.getElementById('dare-text').innerText = dares[Math.floor(Math.random() * dares.length)];
+        unlockNext(8); // Unlock Next
+    }
+
+    // Page 9: Generator
+    const loveMsgs = ["I love you more than yesterday.", "You are my favorite notification.", "My heart beats for you.", "Always you."];
+    function generateLove() {
+        document.getElementById('gen-msg').innerText = loveMsgs[Math.floor(Math.random() * loveMsgs.length)];
+        unlockNext(9); // Unlock Next
+    }
+
+    // Page 11: Tap Game
+    let score = 0;
+    function catchHeart() {
+        score++;
+        document.getElementById('score').innerText = score;
+        const target = document.getElementById('tap-target');
+        const area = document.getElementById('tap-area');
+        target.style.top = Math.random() * (area.clientHeight - 50) + 'px';
+        target.style.left = Math.random() * (area.clientWidth - 50) + 'px';
+        
+        if(score >= 1) unlockNext(11); // Unlock if caught at least once
+    }
+
+    // Page 14: Shy
+    function shyReact(type) {
+        const msg = document.getElementById('shy-reaction');
+        if(type === 'blush') msg.innerText = "*blushes deeply*";
+        if(type === 'smile') msg.innerText = "*smiles shyly*";
+        unlockNext(14); // Unlock Next
+    }
+
+    // Floating Hearts
+    function createFloater() {
+        const floater = document.getElementById('floater');
+        const heart = document.createElement('div');
+        heart.className = 'float-heart';
+        heart.innerText = Math.random() > 0.5 ? '🌸' : '🤍';
+        heart.style.left = Math.random() * 100 + 'vw';
+        heart.style.animationDuration = (Math.random() * 5 + 10) + 's';
+        heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+        floater.appendChild(heart);
+        setTimeout(() => heart.remove(), 15000);
+    }
+    setInterval(createFloater, 2000);
+
+</script>
+</body>
+</html>
